@@ -4,9 +4,9 @@ import Link from "next/link";
 // Sidebar Component
 const Sidebar = () => {
   return (
-    <div className="flex flex-col gap-10 p-5 bg-gray-900 text-gray-300 w-70 overflow-hidden sticky top-0 h-screen">
-      <ul className="flex flex-col gap-5">
-        <li>
+    <div className="flex flex-col gap-10 p-5 bg-gray-900 text-gray-300 w-70 overflow-hidden fixed">
+      
+        <div>
           <Link
             href="/home"
             className="flex items-center gap-3 bg-blue-950 rounded-md p-5"
@@ -22,8 +22,8 @@ const Sidebar = () => {
             </svg>
             Home
           </Link>
-        </li>
-        <li>
+        </div>
+        <div>
           <Link
             href="/dashboard"
             className="flex items-center gap-3 bg-blue-950 rounded-md p-5"
@@ -39,8 +39,8 @@ const Sidebar = () => {
             </svg>
             Dashboard
           </Link>
-        </li>
-        <li>
+        </div>
+        <div>
           <Link
             href="/notifications"
             className="flex items-center gap-3 bg-blue-950 rounded-md p-5"
@@ -56,8 +56,8 @@ const Sidebar = () => {
             </svg>
             Notifications
           </Link>
-        </li>
-        <li>
+        </div>
+        <div>
           <Link
             href="/settings"
             className="flex items-center gap-3 bg-blue-950 rounded-md p-5"
@@ -73,8 +73,8 @@ const Sidebar = () => {
             </svg>
             Settings
           </Link>
-        </li>
-      </ul>
+        </div>
+      
 
       <button className="bg-blue-600 text-white p-2 rounded-md flex items-center gap-3 justify-center">
         <svg

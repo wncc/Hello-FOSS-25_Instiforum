@@ -13,10 +13,17 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <Navbar />
-        <div className="flex">
-        <Sidebar/>
+         <div className="flex min-h-screen">
+      {/* Sidebar */}
+      <aside className="w-1/5 bg-gray-900   text-white p-5">
+       <Sidebar/>
+      </aside>
+
+      {/* Main content */}
+      <main className="w-4/5 bg-yellow-100 p-5">
         {children}
-        </div>
+      </main>
+    </div>
       </body>
     </html>
   );
