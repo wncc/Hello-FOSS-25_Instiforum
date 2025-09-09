@@ -42,8 +42,8 @@ const Sidebar = () => {
         </div>
         <div>
           <Link
-            href="/notifications"
-            className="flex items-center gap-3 bg-blue-950 rounded-md p-5"
+            href="/users"
+            className="flex items-center gacp-3 bg-blue-950 rounded-md p-5"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
