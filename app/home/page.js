@@ -2,9 +2,11 @@
 import React, { use } from 'react'
 import { supabase } from "../lib/supabaseclient"
 import { useEffect, useState } from 'react';
+import Comments from "../../components/comments";
 export default function Home() {
   const [user, setUser] = useState(null);
   const [Posts, setPosts] = useState([]);//state to hold posts from database
+  const [votesByPost, setVotesByPost] = useState({}); // { [postId]: 'up' | 'down' }
   useEffect(() => {
     const fetchPosts = async () => {
       const { data, error } = await supabase
@@ -55,39 +57,93 @@ export default function Home() {
     }
   }, []);
 
+  // Load vote state for the current session/user from localStorage
+  useEffect(() => {
+    const currentSessionKey = localStorage.getItem("sessionKey") || "anon";
+    const stored = localStorage.getItem(`votes:${currentSessionKey}`);
+    try {
+      const parsed = stored ? JSON.parse(stored) : {};
+      setVotesByPost(parsed && typeof parsed === 'object' ? parsed : {});
+    } catch {
+      setVotesByPost({});
+    }
+  }, [user]);
+
+  const getVote = (postId) => votesByPost[postId] || null; // 'up' | 'down' | null
+  const setVote = (postId, value) => {
+    setVotesByPost(prev => {
+      const next = { ...prev };
+      if (value === null) delete next[postId]; else next[postId] = value;
+      const currentSessionKey = localStorage.getItem("sessionKey") || "anon";
+      localStorage.setItem(`votes:${currentSessionKey}`, JSON.stringify(next));
+      return next;
+    })
+  }
 
 
-  const handleUpvote = async (postId, currentUpvotes) => {// function to handle upvote
+
+  const handleUpvote = async (post) => { // toggleable upvote with switch from downvote
+    const current = getVote(post.id);
+    let deltaUp = 0;
+    let deltaDown = 0;
+    let nextVote = null;
+    if (current === 'up') {
+      // remove upvote
+      deltaUp = -1;
+      nextVote = null;
+    } else if (current === 'down') {
+      // switch down -> up
+      deltaUp = 1;
+      deltaDown = -1;
+      nextVote = 'up';
+    } else {
+      // add upvote
+      deltaUp = 1;
+      nextVote = 'up';
+    }
+
     const { error } = await supabase
-      .from("posts")//table name
-      .update({ upvotes: currentUpvotes + 1 })//updates upvotes column by 1
-      .eq("id", postId)//where id is equal to postId
+      .from("posts")
+      .update({ upvotes: post.upvotes + deltaUp, downvotes: post.downvotes + deltaDown })
+      .eq("id", post.id)
 
     if (error) console.error(error)
     else {
-      // Optimistically update state
-      setPosts(prev =>
-        prev.map(p =>
-          p.id === postId ? { ...p, upvotes: p.upvotes + 1 } : p //updates state to reflect upvote, Without Waiting for server response,for smoother UI expirience
-        )
-      )
+      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, upvotes: p.upvotes + deltaUp, downvotes: p.downvotes + deltaDown } : p))
+      setVote(post.id, nextVote);
     }
   }
 
 
-  const handleDownvote = async (postId, currentDownvotes) => {//function to handle downvote
+  const handleDownvote = async (post) => { // toggleable downvote with switch from upvote
+    const current = getVote(post.id);
+    let deltaUp = 0;
+    let deltaDown = 0;
+    let nextVote = null;
+    if (current === 'down') {
+      // remove downvote
+      deltaDown = -1;
+      nextVote = null;
+    } else if (current === 'up') {
+      // switch up -> down
+      deltaUp = -1;
+      deltaDown = 1;
+      nextVote = 'down';
+    } else {
+      // add downvote
+      deltaDown = 1;
+      nextVote = 'down';
+    }
+
     const { error } = await supabase
-      .from("posts")//table name
-      .update({ downvotes: currentDownvotes + 1 })//updates downvotes column by 1
-      .eq("id", postId)//where id is equal to postId
+      .from("posts")
+      .update({ upvotes: post.upvotes + deltaUp, downvotes: post.downvotes + deltaDown })
+      .eq("id", post.id)
 
     if (error) console.error(error)
     else {
-      setPosts(prev =>
-        prev.map(p =>
-          p.id === postId ? { ...p, downvotes: p.downvotes + 1 } : p//updates state to reflect downvote, Without Waiting for server response,for smoother UI expirience
-        )
-      )
+      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, upvotes: p.upvotes + deltaUp, downvotes: p.downvotes + deltaDown } : p))
+      setVote(post.id, nextVote);
     }
   }
 
@@ -106,10 +162,11 @@ export default function Home() {
             <p className="text-gray-700 mb-4">{post.content}</p>
             {post.image_url && (<img src={post.image_url} className='justify-center' alt='' />)}
             <div className='flex gap-3 items-center'>
-              <img src='upvote.svg' onClick={() => { handleUpvote(post.id, post.upvotes) }} className='rounded-full h-5 w-5'></img>
+              <img src='upvote.svg' onClick={() => { handleUpvote(post) }} className={`rounded-full h-5 w-5 ${getVote(post.id) === 'up' ? 'ring-2 ring-orange-500' : ''}`}></img>
               {post.upvotes - post.downvotes}
-              <img src='downvote.svg' onClick={() => { handleDownvote(post.id, post.downvotes) }} className='rounded-full h-5 w-5'></img>
+              <img src='downvote.svg' onClick={() => { handleDownvote(post) }} className={`rounded-full h-5 w-5 ${getVote(post.id) === 'down' ? 'ring-2 ring-blue-500' : ''}`}></img>
             </div>
+            <Comments postId={post.id} />
             <div className="text-sm text-gray-500">Posted on: {new Date(post.created_at).toLocaleDateString()}</div>
           </div>))}
       </div>
