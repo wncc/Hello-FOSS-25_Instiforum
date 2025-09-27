@@ -22,40 +22,79 @@ export default function Home() {
     fetchPosts();
   }, []);
   useEffect(() => {
-    // Extract query parameters from the current URL
-    const urlParams = new URLSearchParams(window.location.search);
+  // Extract query parameters from the current URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const sessionKey = urlParams.get("accessid");
 
-    // Grab the accessid returned by IITB SSO redirect
-    const sessionKey = urlParams.get("accessid");
+  // Case 1: Use localStorage if user is already saved and no new sessionKey
+  const savedUser = localStorage.getItem("user");
+  if (savedUser && !sessionKey) {
+    setUser(JSON.parse(savedUser));
+    return; // Exit early
+  }
 
-    //  Case 1: If user already exists in localStorage AND no new sessionKey from SSO
-    const savedUser = localStorage.getItem("user");
-    if (savedUser && !sessionKey) {
-      // Load user directly from localStorage (persistent login)
-      setUser(JSON.parse(savedUser));
-      return; // Exit early, no need to fetch again
-    }
+  // Case 2: If sessionKey exists (fresh login from SSO)
+  if (sessionKey) {
+    fetch("https://sso.tech-iitb.org/project/getuserdata", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: sessionKey }),
+    })
+      .then((res) => res.json())
+      .then(async (data) => {
+        console.log("User Data:", data);
 
-    //  Case 2: If sessionKey exists (fresh login from SSO)
-    if (sessionKey) {
-      fetch("https://sso.tech-iitb.org/project/getuserdata", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: sessionKey }), // send sessionKey to SSO server
+        // Rebuild the object with your own fields
+        const newData = {
+          id: crypto.randomUUID(),
+          name: data.name,
+          roll: data.roll,
+          department: data.department,
+          degree: data.degree,
+          role: "student",
+        };
+
+        //  STEP 1: Check if user already exists in Supabase
+        const { data: existingUser, error: checkError } = await supabase
+          .from("users")
+          .select("*")
+          .eq("roll", newData.roll)
+          .maybeSingle(); // safer than .single() if no row exists
+
+        if (checkError && checkError.code !== "PGRST116") {
+          console.error("Error checking user:", checkError.message);
+          return;
+        }
+
+        if (existingUser) {
+          // IF user already exists
+          console.log("User already exists:", existingUser);
+          setUser(existingUser);
+          localStorage.setItem("user", JSON.stringify(existingUser));
+        } else {
+          // ELSE: Insert the new user
+          console.log("No existing user found. Inserting new one...");
+          const { data: inserted, error: insertError } = await supabase
+            .from("users")
+            .insert([newData])
+            .select()
+            .single();
+
+          if (insertError) {
+            console.error("Supabase Insert Error:", insertError.message);
+          } else {
+            console.log("Inserted into Supabase:", inserted);
+            setUser(inserted);
+            localStorage.setItem("user", JSON.stringify(inserted));
+          }
+        }
+
+        // Save sessionKey
+        localStorage.setItem("sessionKey", sessionKey);
       })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log("User Data:", data);
-
-          // Save user data in state (for immediate use)
-          setUser(data);
-
-          // Persist session locally so user stays logged in on refresh
-          localStorage.setItem("user", JSON.stringify(data));
-          localStorage.setItem("sessionKey", sessionKey);
-        });
-    }
-  }, []);
+      .catch((err) => console.error("Fetch error:", err));
+  }
+}, []);
 
   // Load vote state for the current session/user from localStorage
   useEffect(() => {
