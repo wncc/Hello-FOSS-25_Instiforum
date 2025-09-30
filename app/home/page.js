@@ -4,14 +4,18 @@ import { supabase } from "../lib/supabaseclient"
 import { useEffect, useState } from 'react';
 import Comments from "../../components/comments";
 export default function Home() {
+  const[search, setSearch]=useState("")
   const [user, setUser] = useState(null);
   const [Posts, setPosts] = useState([]);//state to hold posts from database
   const [votesByPost, setVotesByPost] = useState({}); // { [postId]: 'up' | 'down' }
-  useEffect(() => {
-    const fetchPosts = async () => {
+  const handleChange=(e)=>{
+    setSearch(e.target.value)
+  }
+  const fetchPosts = async () => {
       const { data, error } = await supabase
-        .from('posts')
-        .select('*')
+        .from("posts")
+        .select("*")
+        .ilike("title",`%${search}%`)
         .order('created_at', { ascending: false });
       setPosts(data || []);//sets posts to data fetched from database
       if (error) {
@@ -19,6 +23,9 @@ export default function Home() {
       }
 
     };
+  useEffect(() => {
+    
+    
     fetchPosts();
   }, []);
   useEffect(() => {
@@ -191,7 +198,10 @@ export default function Home() {
   console.log(Posts);
   return (
     <>
-      <div className='p-5 bg-amber-100 min-h-screen  flex flex-col'>
+    <div className='flex  justify-center items-center gap-20'><input type="text" value={search} onChange={handleChange} placeholder='Search' className='px-4 py-2 rounded-full w-1/2 bg-white text-black'/>
+        <button className='rounded-full text-xl bg-blue-400 px-5' onClick={fetchPosts} >Search</button></div>
+      <div className='p-5 bg-amber-100 min-h-screen justify-center items-center flex flex-col'>
+        
         {Posts.map((post) => (//maps through each post in the posts table in database
           <div key={post.id} className=" mx-auto  w-2/3  my-4 p-4 border rounded-lg flex flex-col gap-3  shadow-sm bg-white">
             <div className='flex items-center gap-4'><h2 className="text-2xl font-bold ">{post.title}</h2>
