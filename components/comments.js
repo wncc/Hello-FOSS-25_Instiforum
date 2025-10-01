@@ -1,6 +1,7 @@
 "use client"
 import React, { useEffect, useMemo, useState } from 'react'
 import { supabase } from "../app/lib/supabaseclient"
+import { userAgent } from 'next/server';
 
 function buildCommentTree(flatComments) {
   const idToNode = new Map();
@@ -77,11 +78,14 @@ export default function Comments({ postId }) {
   }, [postId]);
 
   const handleCreate = async (content, parentId = null) => {
+    const userdata=JSON.parse(localStorage.getItem("user") || "{}");
+    const userid= userdata.id || "anon";
     const trimmed = (content || "").trim();
     if (!trimmed) return;
     setSubmitting(true);
     setError(null);
-    const payload = { post_id: postId, parent_id: parentId, content: trimmed, upvotes: 0, downvotes: 0 };
+    const payload = { post_id: postId, parent_id: parentId, content: trimmed, upvotes: 0, downvotes: 0, user_id:userid
+    };
     const { data, error: err } = await supabase
       .from('comments')
       .insert(payload)
