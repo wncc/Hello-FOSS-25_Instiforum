@@ -7,6 +7,9 @@ import {redirect } from 'next/navigation';
 const Create = () => {
   const submitFunc = async (e) => {
     e.preventDefault();
+     const { media_data, media_error } = await supabase.storage
+      .from("media") // your bucket name
+      .upload(filePath, file);
     
     const postjson = {
       title: e.target.title.value,
@@ -19,6 +22,7 @@ const Create = () => {
       downvotes: 0
     };
 
+
     console.log(postjson);
 
     const { data, error } = await supabase.from('posts').insert([postjson]);
@@ -30,7 +34,12 @@ const Create = () => {
 
 
   }
-
+  const openFileExplorer = () => {
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      fileInput.click();
+    }
+  };
   return (
     <div>
       <h1>Create Post</h1>
@@ -47,6 +56,13 @@ const Create = () => {
           <option value="Feedback">Feedback</option>
           <option value="News">News</option>
         </select>
+        <input type="file" name="Media" accept="" className='mb-2'/>
+        <button
+        onClick={openFileExplorer}
+        className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+        Select File 📤
+      </button>
+        
         <button type='submit' className='bg-blue-500 text-white p-2 rounded'>Create Post</button>
       </form>
     </div>
