@@ -17,6 +17,46 @@ InstiForum is a web application designed to facilitate discussions and informati
 - **Database:** Supabase
 - **Authentication:** ITC SSO
 
+## Existing Schemas
+### Users
+| Column Name | Data Type     |
+|-------------|--------------|
+| id (primary)| UUID                        |
+| name        | VARCHAR                     |
+| roll        | VARCHAR                     |
+| degree      | text                        |
+| department  | text                        |
+| role        | text                        |
+| created_at  | timestamp with time zone    |
+
+### Posts
+
+| Column Name   | Data Type                  |
+|---------------|---------------------------|
+| id (primary)  | bigint                    |
+| created_at    | timestamp with time zone  |
+| user_id       | uuid                       |
+| community_id  | bigint                     |
+| title         | text                       |
+| content       | text                       |
+| image_url     | text                       |
+| upvotes       | bigint                     |
+| downvotes     | bigint                     |
+| flair         | text                       |
+
+### Comments
+| Column Name  | Data Type                  |
+|--------------|---------------------------|
+| id           | bigint                    |
+| created_at   | timestamp with time zone  |
+| post_id      | bigint                    |
+| parent_id    | bigint                    |
+| content      | text                      |
+| upvotes      | bigint                    |
+| downvotes    | bigint                    |
+| user_id      | uuid                      |
+
+
 ## Getting Started
 
 ### Prerequisites
