@@ -6,9 +6,7 @@ InstiForum is a web application designed to facilitate discussions and informati
 
 - User authentication (login/signup) using ITC SSO
 - Create, view, and reply to discussion threads
-- Categorize threads by topics
 - Search and filter discussions
-- Responsive UI for desktop and mobile
 
 ## Technologies Used
 
