@@ -1,6 +1,10 @@
 # InstiForum
 
-InstiForum is a web application designed to facilitate discussions and information sharing within an institute community. This README provides an overview of the project, setup instructions, and a detailed explanation of the code structure.
+InstiForum is a web application designed to facilitate discussions and information sharing within an institute community.
+The idea behind Insti Forum came from a very simple observation — despite having an IIT Bombay subreddit, we realized that there’s no dedicated platform where students and members of the campus community can engage in meaningful discussions on a variety of topics. The subreddit is limited to just one community, and not everyone prefers using Reddit.
+
+So, we decided to build our very own social discussion platform, tailored specifically for IIT Bombay — something that feels like a mix of a social media platform and a forum, designed to make campus conversations more open, organized, and accessible.
+This README provides an overview of the project, setup instructions, and a detailed explanation of the code structure.
 
 ## Features
 
