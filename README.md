@@ -88,8 +88,6 @@ This README provides an overview of the project, setup instructions, and a detai
 4. Start the development servers:
     ```bash
     npm run dev
-    cd client
-    npm start
     ```
 ## Contributing
 
