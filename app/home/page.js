@@ -3,6 +3,7 @@ import React, { use } from 'react'
 import { supabase } from "../lib/supabaseclient"
 import { useEffect, useState } from 'react';
 import Comments from "../../components/comments";
+import { IconHome } from '@tabler/icons-react';
 export default function Home() {
   const[search, setSearch]=useState("")
   const [user, setUser] = useState(null);
@@ -23,85 +24,85 @@ export default function Home() {
       }
 
     };
-  useEffect(() => {
+//   useEffect(() => {
     
     
-    fetchPosts();
-  }, []);
-  useEffect(() => {
-  // Extract query parameters from the current URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const sessionKey = urlParams.get("accessid");
+//     fetchPosts();
+//   }, []);
+//   useEffect(() => {
+//   // Extract query parameters from the current URL
+//   const urlParams = new URLSearchParams(window.location.search);
+//   const sessionKey = urlParams.get("accessid");
 
-  // Case 1: Use localStorage if user is already saved and no new sessionKey
-  const savedUser = localStorage.getItem("user");
-  if (savedUser && !sessionKey) {
-    setUser(JSON.parse(savedUser));
-    return; // Exit early
-  }
+//   // Case 1: Use localStorage if user is already saved and no new sessionKey
+//   const savedUser = localStorage.getItem("user");
+//   if (savedUser && !sessionKey) {
+//     setUser(JSON.parse(savedUser));
+//     return; // Exit early
+//   }
 
-  // Case 2: If sessionKey exists (fresh login from SSO)
-  if (sessionKey) {
-    fetch("https://sso.tech-iitb.org/project/getuserdata", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: sessionKey }),
-    })
-      .then((res) => res.json())
-      .then(async (data) => {
-        console.log("User Data:", data);
+//   // Case 2: If sessionKey exists (fresh login from SSO)
+//   if (sessionKey) {
+//     fetch("https://sso.tech-iitb.org/project/getuserdata", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ id: sessionKey }),
+//     })
+//       .then((res) => res.json())
+//       .then(async (data) => {
+//         console.log("User Data:", data);
 
-        // Rebuild the object with your own fields
-        const newData = {
-          id: crypto.randomUUID(),
-          name: data.name,
-          roll: data.roll,
-          department: data.department,
-          degree: data.degree,
-          role: "student",
-        };
+//         // Rebuild the object with your own fields
+//         const newData = {
+//           id: crypto.randomUUID(),
+//           name: data.name,
+//           roll: data.roll,
+//           department: data.department,
+//           degree: data.degree,
+//           role: "student",
+//         };
 
-        //  STEP 1: Check if user already exists in Supabase
-        const { data: existingUser, error: checkError } = await supabase
-          .from("users")
-          .select("*")
-          .eq("roll", newData.roll)
-          .maybeSingle(); // safer than .single() if no row exists
+//         //  STEP 1: Check if user already exists in Supabase
+//         const { data: existingUser, error: checkError } = await supabase
+//           .from("users")
+//           .select("*")
+//           .eq("roll", newData.roll)
+//           .maybeSingle(); // safer than .single() if no row exists
 
-        if (checkError && checkError.code !== "PGRST116") {
-          console.error("Error checking user:", checkError.message);
-          return;
-        }
+//         if (checkError && checkError.code !== "PGRST116") {
+//           console.error("Error checking user:", checkError.message);
+//           return;
+//         }
 
-        if (existingUser) {
-          // IF user already exists
-          console.log("User already exists:", existingUser);
-          setUser(existingUser);
-          localStorage.setItem("user", JSON.stringify(existingUser));
-        } else {
-          // ELSE: Insert the new user
-          console.log("No existing user found. Inserting new one...");
-          const { data: inserted, error: insertError } = await supabase
-            .from("users")
-            .insert([newData])
-            .select()
-            .single();
+//         if (existingUser) {
+//           // IF user already exists
+//           console.log("User already exists:", existingUser);
+//           setUser(existingUser);
+//           localStorage.setItem("user", JSON.stringify(existingUser));
+//         } else {
+//           // ELSE: Insert the new user
+//           console.log("No existing user found. Inserting new one...");
+//           const { data: inserted, error: insertError } = await supabase
+//             .from("users")
+//             .insert([newData])
+//             .select()
+//             .single();
 
-          if (insertError) {
-            console.error("Supabase Insert Error:", insertError.message);
-          } else {
-            console.log("Inserted into Supabase:", inserted);
-            setUser(inserted);
-            localStorage.setItem("user", JSON.stringify(inserted));
-          }
-        }
+//           if (insertError) {
+//             console.error("Supabase Insert Error:", insertError.message);
+//           } else {
+//             console.log("Inserted into Supabase:", inserted);
+//             setUser(inserted);
+//             localStorage.setItem("user", JSON.stringify(inserted));
+//           }
+//         }
 
-        // Save sessionKey
-        localStorage.setItem("sessionKey", sessionKey);
-      })
-      .catch((err) => console.error("Fetch error:", err));
-  }
-}, []);
+//         // Save sessionKey
+//         localStorage.setItem("sessionKey", sessionKey);
+//       })
+//       .catch((err) => console.error("Fetch error:", err));
+//   }
+// }, []);
 
   // Load vote state for the current session/user from localStorage
   useEffect(() => {
@@ -197,11 +198,9 @@ export default function Home() {
 
   console.log(Posts);
   return (
-    <>
-    <div className='flex  justify-center items-center gap-20'><input type="text" value={search} onChange={handleChange} placeholder='Search' className='px-4 py-2 rounded-full w-1/2 bg-white text-black'/>
+    <div className='min-h-screen w-full flex justify-center items-center'>
+      {/* <div className='flex justify-center items-center gap-20'><input type="text" value={search} onChange={handleChange} placeholder='Search' className='px-4 py-2 rounded-full w-1/2 bg-white text-black'/>
         <button className='rounded-full text-xl bg-blue-400 px-5' onClick={fetchPosts} >Search</button></div>
-      <div className='p-5 bg-amber-100 min-h-screen justify-center items-center flex flex-col'>
-        
         {Posts.map((post) => (//maps through each post in the posts table in database
           <div key={post.id} className=" mx-auto  w-2/3  my-4 p-4 border rounded-lg flex flex-col gap-3  shadow-sm bg-white">
             <div className='flex items-center gap-4'><h2 className="text-2xl font-bold ">{post.title}</h2>
@@ -217,9 +216,8 @@ export default function Home() {
             </div>
             <Comments postId={post.id} />
             <div className="text-sm text-gray-500">Posted on: {new Date(post.created_at).toLocaleDateString()}</div>
-          </div>))}
-      </div>
-
-    </>
+      </div>))} */}
+      <h1>Home</h1>
+    </div>
   )
 }

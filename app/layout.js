@@ -36,7 +36,7 @@ export default function RootLayout({ children }) {
     {
       title: "Create A Post",
       icon: <IconPlus />,
-      href: "/create-post",
+      href: "/create",
     }
   ]
 
@@ -46,7 +46,7 @@ export default function RootLayout({ children }) {
         {/* <Navbar /> */}
 
         {/* Main content */}
-        <main className="flex w-full min-h-screen bg-[#e8e8e8]">
+        <main className="flex w-full min-h-screen bg-[#e8e8e8] text-black">
             {children}
         </main>
 
