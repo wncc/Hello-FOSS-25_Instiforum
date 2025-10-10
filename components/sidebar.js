@@ -4,12 +4,12 @@ import Link from "next/link";
 // Sidebar Component
 const Sidebar = () => {
   return (
-    <div className="flex flex-col gap-10 p-5 bg-gray-900 text-gray-300 w-70 overflow-hidden fixed">
+    <div className="flex flex-col gap-10 p-5 bg-gray-900 text-gray-300 w-100% h-screen">
       
         <div>
           <Link
             href="/home"
-            className="flex items-center gap-3 bg-blue-950 rounded-md p-5"
+            className="flex items-center gap-3 bg-blue-950 rounded-md p-5 w-auto align-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -26,7 +26,7 @@ const Sidebar = () => {
         <div>
           <Link
             href="/dashboard"
-            className="flex items-center gap-3 bg-blue-950 rounded-md p-5"
+            className="flex items-center gap-3 bg-blue-950 rounded-md p-5 w-auto align-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -43,7 +43,7 @@ const Sidebar = () => {
         <div>
           <Link
             href="/users"
-            className="flex items-center gacp-3 bg-blue-950 rounded-md p-5"
+            className="flex items-center gap-3 bg-blue-950 rounded-md p-5 w-auto align-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -60,7 +60,7 @@ const Sidebar = () => {
         <div>
           <Link
             href="/settings"
-            className="flex items-center gap-3 bg-blue-950 rounded-md p-5"
+            className="flex items-center gap-3 bg-blue-950 rounded-md p-5 w-auto align-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -76,7 +76,7 @@ const Sidebar = () => {
         </div>
       
 
-      <button className="bg-blue-600 text-white p-2 rounded-md flex items-center gap-3 justify-center">
+      <button className="bg-blue-600 text-white p-2 rounded-md flex items-center gap-3 justify-center w-auto align-center">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           height="24px"
