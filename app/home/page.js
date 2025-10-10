@@ -4,34 +4,32 @@ import { supabase } from "../lib/supabaseclient"
 import { useEffect, useState } from 'react';
 import Comments from "../../components/comments";
 export default function Home() {
-  const[search, setSearch]=useState("")
   const [user, setUser] = useState(null);
   const [Posts, setPosts] = useState([]);//state to hold posts from database
   const [votesByPost, setVotesByPost] = useState({}); // { [postId]: 'up' | 'down' }
-  const handleChange=(e)=>{
-    setSearch(e.target.value)
-  }
-  const fetchPosts = async () => {
+  
+  const fetchPosts = async (searchQuery = "") => {
       const { data, error } = await supabase
         .from("posts")
         .select("*")
-        .ilike("title",`%${search}%`)
+        .ilike("title",`%${searchQuery}%`)
         .order('created_at', { ascending: false });
       setPosts(data || []);//sets posts to data fetched from database
       if (error) {
         console.error('Error fetching posts:', error);
       }
-
     };
+
   useEffect(() => {
     
-    
-    fetchPosts();
+
   }, []);
   useEffect(() => {
   // Extract query parameters from the current URL
   const urlParams = new URLSearchParams(window.location.search);
   const sessionKey = urlParams.get("accessid");
+  const searchQuery = urlParams.get("search") || "";
+  fetchPosts(searchQuery);
 
   // Case 1: Use localStorage if user is already saved and no new sessionKey
   const savedUser = localStorage.getItem("user");
@@ -196,11 +194,19 @@ export default function Home() {
 
 
   console.log(Posts);
+  
+
+  const currentSearch = typeof window !== 'undefined' ? 
+  new URLSearchParams(window.location.search).get("search") || "" : "";
+  
   return (
     <>
-    <div className='flex  justify-center items-center gap-20'><input type="text" value={search} onChange={handleChange} placeholder='Search' className='px-4 py-2 rounded-full w-1/2 bg-white text-black'/>
-        <button className='rounded-full text-xl bg-blue-400 px-5' onClick={fetchPosts} >Search</button></div>
       <div className='p-5 bg-amber-100 min-h-screen justify-center items-center flex flex-col'>
+        {currentSearch && (
+          <div className='mb-4 text-lg text-gray-700'>
+            Search results for: "<span className='font-semibold'>{currentSearch}</span>"
+          </div>
+        )}
         
         {Posts.map((post) => (//maps through each post in the posts table in database
           <div key={post.id} className=" mx-auto  w-2/3  my-4 p-4 border rounded-lg flex flex-col gap-3  shadow-sm bg-white">
