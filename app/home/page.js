@@ -5,24 +5,20 @@ import { useEffect, useState } from 'react';
 import Comments from "../../components/comments";
 import { IconHome } from '@tabler/icons-react';
 export default function Home() {
-  const[search, setSearch]=useState("")
   const [user, setUser] = useState(null);
   const [Posts, setPosts] = useState([]);//state to hold posts from database
   const [votesByPost, setVotesByPost] = useState({}); // { [postId]: 'up' | 'down' }
-  const handleChange=(e)=>{
-    setSearch(e.target.value)
-  }
-  const fetchPosts = async () => {
+  
+  const fetchPosts = async (searchQuery = "") => {
       const { data, error } = await supabase
         .from("posts")
         .select("*")
-        .ilike("title",`%${search}%`)
+        .ilike("title",`%${searchQuery}%`)
         .order('created_at', { ascending: false });
       setPosts(data || []);//sets posts to data fetched from database
       if (error) {
         console.error('Error fetching posts:', error);
       }
-
     };
 //   useEffect(() => {
     
@@ -197,6 +193,11 @@ export default function Home() {
 
 
   console.log(Posts);
+  
+
+  const currentSearch = typeof window !== 'undefined' ? 
+  new URLSearchParams(window.location.search).get("search") || "" : "";
+  
   return (
     <div className='min-h-screen w-full flex justify-center items-center'>
       {/* <div className='flex justify-center items-center gap-20'><input type="text" value={search} onChange={handleChange} placeholder='Search' className='px-4 py-2 rounded-full w-1/2 bg-white text-black'/>
