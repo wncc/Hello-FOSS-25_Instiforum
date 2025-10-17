@@ -33,9 +33,9 @@ const Create = () => {
 
     
   return (
-    <div>
+    <div className='min-h-screen w-full flex flex-col gap-4 items-center justify-center'>
       <h1>Create Post</h1>
-      <form onSubmit={submitFunc} className='flex flex-col max-w-md mx-auto'>
+      <form onSubmit={submitFunc} className='flex flex-col min-w-md'>
         <input name="title" type="text" placeholder='Title'  className='border p-2 w-full mb-2'/>
         <textarea name="content" placeholder='Content' className='border p-2 w-full mb-2'></textarea>
         <select name="flair" className='border p-2 w-full mb-2'>
@@ -49,7 +49,6 @@ const Create = () => {
           <option value="News">News</option>
         </select>
       
-        
         <button type='submit' className='bg-blue-500 text-white p-2 rounded'>Create Post</button>
       </form>
     </div>
