@@ -201,7 +201,7 @@ export default function Home() {
   
   return (
     <>
-      <div className='p-5 bg-amber-100 min-h-screen justify-center items-center flex flex-col'>
+      <div className='p-5 bg-white-100 min-h-130 justify-center items-center flex flex-col'>
         {currentSearch && (
           <div className='mb-4 text-lg text-gray-700'>
             Search results for: "<span className='font-semibold'>{currentSearch}</span>"
@@ -209,20 +209,22 @@ export default function Home() {
         )}
         
         {Posts.map((post) => (//maps through each post in the posts table in database
-          <div key={post.id} className=" mx-auto  w-2/3  my-4 p-4 border rounded-lg flex flex-col gap-3  shadow-sm bg-white">
+          <div key={post.id} className=" mx-auto w-2/3  my-4 p-4 rounded-lg flex flex-col gap-3  shadow-sm" style={{background: 'linear-gradient(to right, #00bfff, #001f4d)', borderBottom:'4px solid #3288a5ff'}}>
             <div className='flex items-center gap-4'><h2 className="text-2xl font-bold ">{post.title}</h2>
               <div className='text-m rounded-full flex justify-center items-center bg-blue-400 p-1 w-20 text-center text-white'> {post.flair}</div>
             </div>
 
-            <p className="text-gray-700 mb-4">{post.content}</p>
+            <p className="text-white-700 mb-4">{post.content}</p>
             {post.image_url && (<img src={post.image_url} className='justify-center' alt='' />)}
-            <div className='flex gap-3 items-center'>
+            <div className=' translate-y-8 w-full'>
+              <Comments postId={post.id} />
+            </div>
+            <div className='flex translate-y-8 gap-3 items-center'>
               <img src='upvote.svg' onClick={() => { handleUpvote(post) }} className={`rounded-full h-5 w-5 ${getVote(post.id) === 'up' ? 'ring-2 ring-orange-500' : ''}`}></img>
               {post.upvotes - post.downvotes}
               <img src='downvote.svg' onClick={() => { handleDownvote(post) }} className={`rounded-full h-5 w-5 ${getVote(post.id) === 'down' ? 'ring-2 ring-blue-500' : ''}`}></img>
             </div>
-            <Comments postId={post.id} />
-            <div className="text-sm text-gray-500">Posted on: {new Date(post.created_at).toLocaleDateString()}</div>
+            <div className="text-sm text-right text-grey-900">POSTED ON: {new Date(post.created_at).toLocaleDateString()}</div>
           </div>))}
       </div>
 

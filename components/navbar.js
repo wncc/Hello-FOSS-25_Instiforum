@@ -15,18 +15,18 @@ const Navbar = () => {
     }
   }, []);
 
-  const buttonText = user ? user.name : "Signin";
+  const buttonText = user ? user.name : "SIGN IN";
   const buttonHref = user ? "/profile" : "/signin";
 
   return (
-    <div className='sticky top-0 flex justify-between items-center p-4 bg-amber-100 text-white bg-gray-900'>
-      <h1 className='text-3xl font-bold text-white'>Instiforum</h1>
+    <div className='sticky top-0 flex justify-between items-center p-4 bg-gradient-to-br from-[#87CEEB] to-[#6495ED] text-white bg-gray-900'>
+      <h1 className='text-4xl font-bold bg-gradient-to-r from-sky-500 to-blue-800 text-transparent bg-clip-text'>Instiforum</h1>
       <Search />
       <div>
         <Link href={buttonHref}>
-          <button className='bg-blue-500 flex w-40 justify-around items-center text-white px-4 py-2 rounded-full mr-2'>
-            <img src='placeholder.png' className='rounded-full h-10 w-10' alt='Profile'/>
-            {buttonText}
+          <button className='bg-blue-500 flex w-40 justify-around items-center text-white px-4 py-2 rounded-full mr-2' style={{borderBottom:'3px solid blue'}}>
+            {/* <img src='placeholder.png' className='rounded-full h-10 w-10' alt='Profile'/> */}
+            <span style={{ fontWeight: 'bold'}}>{buttonText}</span>
           </button>
         </Link>
       </div>
