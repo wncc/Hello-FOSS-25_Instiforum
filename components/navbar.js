@@ -20,7 +20,7 @@ const Navbar = () => {
 
   return (
     <div className='sticky top-0 flex justify-between items-center p-4 bg-gradient-to-br from-[#87CEEB] to-[#6495ED] text-white bg-gray-900'>
-      <h1 className='text-4xl font-bold bg-gradient-to-r from-sky-500 to-blue-800 text-transparent bg-clip-text'>IITB Instiforum</h1>
+      <h1 className='text-4xl font-bold bg-gradient-to-r from-sky-500 to-blue-800 text-transparent bg-clip-text'>Instiforum</h1>
       <Search />
       <div>
         <Link href={buttonHref}>
