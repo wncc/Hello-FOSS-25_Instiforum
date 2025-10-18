@@ -1,7 +1,8 @@
 "use client"
+
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Search from './Search';
+import { Button } from './ui/button';
 
 const Navbar = () => {
   const [user, setUser] = useState(null);
@@ -10,7 +11,8 @@ const Navbar = () => {
     const localUser = localStorage.getItem("user");
     if (localUser) {
       setUser(JSON.parse(localUser));
-    } else {
+    } 
+    else {
       setUser(null);
     }
   }, []);
@@ -19,16 +21,30 @@ const Navbar = () => {
   const buttonHref = user ? "/profile" : "/signin";
 
   return (
-    <div className='sticky top-0 flex justify-between items-center p-4 bg-gradient-to-br from-[#87CEEB] to-[#6495ED] text-white bg-gray-900'>
-      <h1 className='text-4xl font-bold bg-gradient-to-r from-sky-500 to-blue-800 text-transparent bg-clip-text'>Instiforum</h1>
-      <Search />
-      <div>
-        <Link href={buttonHref}>
-          <button className='bg-blue-500 flex w-40 justify-around items-center text-white px-4 py-2 rounded-full mr-2' style={{borderBottom:'3px solid blue'}}>
-            {/* <img src='placeholder.png' className='rounded-full h-10 w-10' alt='Profile'/> */}
-            <span style={{ fontWeight: 'bold'}}>{buttonText}</span>
-          </button>
+    <div className='fixed top-0 w-full bg-white/80 backdrop-blur-2xl flex items-center justify-center text-black'>
+      <div className='flex justify-between items-center px-6 py-3 w-full max-w-[1800px]'>
+        <Link href="/home">
+          <h1 className='text-3xl font-semibold'>Instiforum</h1>
         </Link>
+        <div>
+          {
+            user ?
+            (
+              <div className='flex gap-4 items-center'>
+                <Link href="/profile">
+                  {/* replace this with actual image of user */}
+                  <img src={user ? user.image: "https://avatar.iran.liara.run/public/36"} className='h-9 w-9 rounded-full border-1 border-gray-300' alt='user image' />
+                </Link>
+                <Button variant="default">Logout</Button>
+              </div>
+             
+            ) : (
+              <Link href="/signin">
+                <Button variant="default">Login</Button>
+              </Link>
+            )
+          }
+        </div>
       </div>
     </div>
   );
