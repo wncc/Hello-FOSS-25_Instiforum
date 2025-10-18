@@ -137,7 +137,7 @@ export default function Comments({ postId }) {
     <div className='mt-2'>
       <div className='flex gap-2 items-center'>
         <input value={newComment} onChange={(e) => setNewComment(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleCreate(newComment, null).then(() => setNewComment("")); } }} placeholder='Add a comment' className='flex-1 px-3 py-2 border rounded'/>
-        <button disabled={submitting} onClick={() => { handleCreate(newComment, null).then(() => setNewComment("")); }} className={`px-3 py-2 rounded text-white ${submitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-500'}`}>{submitting ? 'Posting...' : 'Comment'}</button>
+        <button disabled={submitting} onClick={() => { handleCreate(newComment, null).then(() => setNewComment("")); }} className={`px-3 py-2 rounded text-white ${submitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600'}`}>{submitting ? 'Posting...' : 'Comment'}</button>
       </div>
       {loading && <div className='text-sm text-gray-500 mt-2'>Loading comments...</div>}
       {error && <div className='text-sm text-red-500 mt-2'>{error}</div>}
