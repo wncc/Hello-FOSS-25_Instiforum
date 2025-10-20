@@ -10,6 +10,7 @@ export default function Home() {
   const [Posts, setPosts] = useState([]); //state to hold posts from database
   const [votesByPost, setVotesByPost] = useState({}); // { [postId]: 'up' | 'down' }
   const [isLoaded, setIsLoaded] = useState(false); // State for the fade-in effect
+  const [votingInProgress, setVotingInProgress] = useState({}); // { [postId]: boolean }
 
   // This effect triggers the fade-in animation after the component has mounted
   useEffect(() => {
@@ -135,7 +136,9 @@ export default function Home() {
   };
 
   const handleUpvote = async (post) => {
-    // toggleable upvote with switch from downvote
+    // Prevent double-clicks during operation
+    if (votingInProgress[post.id]) return;
+
     const current = getVote(post.id);
     let deltaUp = 0;
     let deltaDown = 0;
@@ -155,74 +158,109 @@ export default function Home() {
       nextVote = "up";
     }
 
-    const { error } = await supabase
-      .from("posts")
-      .update({
-        upvotes: post.upvotes + deltaUp,
-        downvotes: post.downvotes + deltaDown,
-      })
-      .eq("id", post.id);
+    // Set loading state
+    setVotingInProgress((prev) => ({ ...prev, [post.id]: true }));
 
-    if (error) console.error(error);
-    else {
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === post.id
-            ? {
-                ...p,
-                upvotes: p.upvotes + deltaUp,
-                downvotes: p.downvotes + deltaDown,
-              }
-            : p
-        )
-      );
-      setVote(post.id, nextVote);
+    try {
+      const { error, data } = await supabase
+        .from("posts")
+        .update({
+          upvotes: post.upvotes >= 0 ? (post.upvotes || 0) + deltaUp : 0,
+          downvotes:
+            post.downvotes >= 0 ? (post.downvotes || 0) + deltaDown : 0,
+        })
+        .eq("id", post.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Failed to update vote:", error);
+        alert("Failed to update vote. Please try again.");
+      } else {
+        // Only update UI after successful database operation
+        setPosts((prev) => prev.map((p) => (p.id === post.id ? data : p)));
+        setVote(post.id, nextVote);
+      }
+    } catch (err) {
+      console.error("Error during vote:", err);
+      alert("An error occurred. Please try again.");
+    } finally {
+      // Clear loading state
+      setVotingInProgress((prev) => ({ ...prev, [post.id]: false }));
     }
   };
 
   const handleDownvote = async (post) => {
-    // toggleable downvote with switch from upvote
+    // Prevent double-clicks during operation
+    if (votingInProgress[post.id]) return;
+
     const current = getVote(post.id);
+    const score = (post.upvotes || 0) - (post.downvotes || 0);
+
     let deltaUp = 0;
     let deltaDown = 0;
     let nextVote = null;
+
     if (current === "down") {
-      // remove downvote
+      // CASE 1: User is removing their existing downvote.
+      // This is always allowed.
       deltaDown = -1;
       nextVote = null;
     } else if (current === "up") {
-      // switch up -> down
-      deltaUp = -1;
-      deltaDown = 1;
-      nextVote = "down";
+      // CASE 2: User has upvoted, and now clicks downvote.
+      if (score === 1) {
+        // If the score is exactly 1, just undo the upvote to make the score 0.
+        deltaUp = -1;
+        deltaDown = 0; // We do NOT add a downvote here.
+        nextVote = null; // The user's vote becomes neutral.
+      } else {
+        // If the score is greater than 1, perform a full switch.
+        deltaUp = -1;
+        deltaDown = 1;
+        nextVote = "down";
+      }
     } else {
-      // add downvote
-      deltaDown = 1;
-      nextVote = "down";
+      // current is null
+      // CASE 3: User is adding a new downvote to a neutral post.
+      // Only allow this if the score is > 0.
+      if (score > 0) {
+        deltaUp = 0;
+        deltaDown = 1;
+        nextVote = "down";
+      } else {
+        // If score is 0, do nothing, just as you wanted.
+        return;
+      }
     }
 
-    const { error } = await supabase
-      .from("posts")
-      .update({
-        upvotes: post.upvotes + deltaUp,
-        downvotes: post.downvotes + deltaDown,
-      })
-      .eq("id", post.id);
+    // Set loading state
+    setVotingInProgress((prev) => ({ ...prev, [post.id]: true }));
 
-    if (error) console.error(error);
-    else {
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === post.id
-            ? {
-                ...p,
-                upvotes: p.upvotes + deltaUp,
-                downvotes: p.downvotes + deltaDown,
-              }
-            : p
-        )
-      );
-      setVote(post.id, nextVote);
+    try {
+      const { error, data } = await supabase
+        .from("posts")
+        .update({
+          upvotes: (post.upvotes || 0) + deltaUp,
+          downvotes: (post.downvotes || 0) + deltaDown,
+        })
+        .eq("id", post.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Failed to update vote:", error);
+        alert("Failed to update vote. Please try again.");
+      } else {
+        // Only update UI after successful database operation
+        setPosts((prev) => prev.map((p) => (p.id === post.id ? data : p)));
+        setVote(post.id, nextVote);
+      }
+    } catch (err) {
+      console.error("Error during vote:", err);
+      alert("An error occurred. Please try again.");
+    } finally {
+      // Clear loading state
+      setVotingInProgress((prev) => ({ ...prev, [post.id]: false }));
     }
   };
 
@@ -240,93 +278,116 @@ export default function Home() {
       <style jsx global>{`
         body {
           background-color: #111827; // This matches bg-gray-900
-          }
-          .card-container {
-            // Add padding to ensure scroll effects are visible at the start and end of the list
-            padding-top: 15vh;
-            padding-bottom: 50vh;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-right: 100px;
-            }
-            .card {
-              // Initial state for the fade-in animation (invisible and slightly moved down)
-              opacity: 0;
-              transform: translateY(20px);
-              transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-              }
-              .card-loaded {
-                // Final state for the fade-in animation (fully visible and in position)
-                opacity: 1;
-                transform: translateY(0px);
-                }
-                `}</style>
+        }
+        .card-container {
+          // Add padding to ensure scroll effects are visible at the start and end of the list
+          padding-top: 15vh;
+          padding-bottom: 50vh;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-right: 100px;
+        }
+        .card {
+          // Initial state for the fade-in animation (invisible and slightly moved down)
+          opacity: 0;
+          transform: translateY(20px);
+          transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+        .card-loaded {
+          // Final state for the fade-in animation (fully visible and in position)
+          opacity: 1;
+          transform: translateY(0px);
+        }
+      `}</style>
 
-                <InteractiveBg />
+      <InteractiveBg />
       {/* This container holds the stacking cards */}
       <div className="card-container">
-        {Posts.map((post, index) => (
-          <div
-            key={post.id}
-            // We apply animation classes and then inline styles for dynamic stacking and delays
-            className={`card ${
-              isLoaded ? "card-loaded" : ""
-            } mx-auto w-full max-w-4xl my-4 p-4 rounded-lg flex flex-col gap-3 shadow-lg`}
-            style={{
-              background: "linear-gradient(to right, #00bfff, #5187d9ff)",
-              borderBottom: "4px solid #3288a5ff",
-              position: "sticky",
-              top: `${100 + index * 10}px`, // Makes cards stick to the top with an offset, creating the stack
-              transform: `scale(${1 - (Posts.length - 1 - index) * 0.04})`, // Scales down cards that are further back in the stack
-              zIndex: index, // Ensures the correct card is always on top
-              transitionDelay: `${index * 100}ms`, // Creates a staggered fade-in effect for each card
-            }}
-          >
-            {/* All of your original card content remains unchanged */}
-            <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-bold">{post.title}</h2>
-              <div className="text-m rounded-full flex justify-center items-center bg-blue-400 p-1 w-20 text-center text-white">
-                {post.flair}
+        {Posts.map((post, index) => {
+          let score = (post.upvotes || 0) - (post.downvotes || 0);
+          let currentUserVote = getVote(post.id);
+          const isDownvoteDisabled = score <= 0 && currentUserVote !== "down";
+          return (
+            <div
+              key={post.id}
+              // We apply animation classes and then inline styles for dynamic stacking and delays
+              className={`card ${
+                isLoaded ? "card-loaded" : ""
+              } mx-auto w-full max-w-4xl my-4 p-4 rounded-lg flex flex-col gap-3 shadow-lg`}
+              style={{
+                background: "linear-gradient(to right, #00bfff, #5187d9ff)",
+                borderBottom: "4px solid #3288a5ff",
+                position: "sticky",
+                top: `${100 + index * 10}px`, // Makes cards stick to the top with an offset, creating the stack
+                transform: `scale(${1 - (Posts.length - 1 - index) * 0.04})`, // Scales down cards that are further back in the stack
+                zIndex: index, // Ensures the correct card is always on top
+                transitionDelay: `${index * 100}ms`, // Creates a staggered fade-in effect for each card
+              }}
+            >
+              {/* All of your original card content remains unchanged */}
+              <div className="flex items-center gap-4">
+                <h2 className="text-2xl font-bold">{post.title}</h2>
+                <div className="text-m rounded-full flex justify-center items-center bg-blue-400 p-1 w-20 text-center text-white">
+                  {post.flair}
+                </div>
+              </div>
+
+              <p className="text-gray-700 mb-4">{post.content}</p>
+              {post.image_url && (
+                <img src={post.image_url} className="justify-center" alt="" />
+              )}
+              <div className="flex gap-3 items-center">
+                <img
+                  src="upvote.svg"
+                  onClick={() => {
+                    handleUpvote(post);
+                  }}
+                  className={`rounded-full h-5 w-5 cursor-pointer transition-opacity ${
+                    votingInProgress[post.id]
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  } ${
+                    getVote(post.id) === "up" ? "ring-2 ring-orange-500" : ""
+                  }`}
+                  style={{
+                    pointerEvents: votingInProgress[post.id] ? "none" : "auto",
+                  }}
+                />
+                {post.upvotes - post.downvotes}
+                <img
+                  src="downvote.svg"
+                  onClick={() => {
+                    // The handler is already protected, but this is good practice
+                    if (!isDownvoteDisabled) {
+                      handleDownvote(post);
+                    }
+                  }}
+                  className={`rounded-full h-5 w-5 transition-opacity ${
+                    // Apply disabled styles
+                    isDownvoteDisabled || votingInProgress[post.id]
+                      ? "opacity-50 cursor-not-allowed"
+                      : "cursor-pointer"
+                  } ${
+                    currentUserVote === "down" ? "ring-2 ring-blue-500" : ""
+                  }`}
+                  style={{
+                    // Also disable pointer events
+                    pointerEvents:
+                      isDownvoteDisabled || votingInProgress[post.id]
+                        ? "none"
+                        : "auto",
+                  }}
+                />
+              </div>
+              <Comments postId={post.id} />
+              <div className="text-sm text-gray-500">
+                Posted on: {new Date(post.created_at).toLocaleDateString()}
               </div>
             </div>
-
-            <p className="text-gray-200 mb-4">{post.content}</p>
-            {post.image_url && (
-              <img
-                src={post.image_url}
-                className="justify-center rounded-md"
-                alt=""
-              />
-            )}
-            <div className="transform translate-y-10">
-              <Comments postId={post.id} />
-            </div>
-            <div className="flex gap-3 transform translate-y-10 items-center">
-              <img
-                src="upvote.svg"
-                alt="upvote"
-                onClick={() => handleUpvote(post)}
-                className={`cursor-pointer rounded-full h-5 w-5 ${
-                  getVote(post.id) === "up" ? "ring-2 ring-orange-500" : ""
-                }`}
-              />
-              <span>{post.upvotes - post.downvotes}</span>
-              <img
-                src="downvote.svg"
-                alt="downvote"
-                onClick={() => handleDownvote(post)}
-                className={`cursor-pointer rounded-full h-5 w-5 ${
-                  getVote(post.id) === "down" ? "ring-2 ring-blue-500" : ""
-                }`}
-              />
-            </div>
-            <div className="text-right text-gray-300">
-              Posted on: {new Date(post.created_at).toLocaleDateString()}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
