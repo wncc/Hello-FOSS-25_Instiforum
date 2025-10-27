@@ -22,17 +22,17 @@ const Search = () => {
     setSearch(e.target.value);
   };
   return (
-    <div className="flex justify-center z-50 items-center gap-3">
+    <div className="flex justify-center items-center gap-3">
       <input
         type="text"
         value={search}
         onChange={handleInputChange}
         onKeyPress={handleKeyPress}
         placeholder="Search posts by title..."
-        className="px-4 py-2 rounded-full w-80 z-50 bg-white text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="px-4 py-2 rounded-full w-80 bg-white text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
       <button
-        className="rounded-full bg-blue-400 z-50 hover:bg-blue-500 transition-colors px-4 py-2 text-white"
+        className="rounded-full bg-blue-400 hover:bg-blue-500 transition-colors px-4 py-2 text-white"
         onClick={handleSearch}
       >
         Search
