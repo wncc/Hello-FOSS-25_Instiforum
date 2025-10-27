@@ -338,7 +338,10 @@ export default function Home() {
               {post.image_url && (
                 <img src={post.image_url} className="justify-center" alt="" />
               )}
-              <div className="flex gap-3 items-center">
+              <div className="translate-y-10">
+              <Comments postId={post.id} />
+              </div>
+              <div className="flex gap-3 items-center translate-y-8">
                 <img
                   src="upvote.svg"
                   onClick={() => {
@@ -381,8 +384,7 @@ export default function Home() {
                   }}
                 />
               </div>
-              <Comments postId={post.id} />
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-right text-gray-800">
                 Posted on: {new Date(post.created_at).toLocaleDateString()}
               </div>
             </div>
