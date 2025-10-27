@@ -1,24 +1,14 @@
 "use client";
-import React, { use, useEffect, useState } from "react";
+import React, { use } from "react";
 import { supabase } from "../lib/supabaseclient";
+import { useEffect, useState } from "react";
 import Comments from "../../components/comments";
-import InteractiveBg from "@/components/bg/interactivebg";
-import Search from "@/components/Search";
-
+import { IconHome } from "@tabler/icons-react";
 export default function Home() {
   const [user, setUser] = useState(null);
   const [Posts, setPosts] = useState([]); //state to hold posts from database
   const [votesByPost, setVotesByPost] = useState({}); // { [postId]: 'up' | 'down' }
-  const [isLoaded, setIsLoaded] = useState(false); // State for the fade-in effect
   const [votingInProgress, setVotingInProgress] = useState({}); // { [postId]: boolean }
-
-  // This effect triggers the fade-in animation after the component has mounted
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoaded(true);
-    }, 100); // A small delay ensures the transition is applied correctly
-    return () => clearTimeout(timer);
-  }, []);
 
   const fetchPosts = async (searchQuery = "") => {
     const { data, error } = await supabase
@@ -31,11 +21,9 @@ export default function Home() {
       console.error("Error fetching posts:", error);
     }
   };
-
   useEffect(() => {
     fetchPosts();
   }, []);
-
   useEffect(() => {
     // Extract query parameters from the current URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -143,6 +131,7 @@ export default function Home() {
     let deltaUp = 0;
     let deltaDown = 0;
     let nextVote = null;
+
     if (current === "up") {
       // remove upvote
       deltaUp = -1;
@@ -165,9 +154,8 @@ export default function Home() {
       const { error, data } = await supabase
         .from("posts")
         .update({
-          upvotes: post.upvotes >= 0 ? (post.upvotes || 0) + deltaUp : 0,
-          downvotes:
-            post.downvotes >= 0 ? (post.downvotes || 0) + deltaDown : 0,
+          upvotes: (post.upvotes >= 0 ? (post.upvotes || 0) + deltaUp : 0),
+          downvotes: (post.downvotes >= 0 ? (post.downvotes || 0) + deltaDown : 0),
         })
         .eq("id", post.id)
         .select()
@@ -190,7 +178,7 @@ export default function Home() {
     }
   };
 
-  const handleDownvote = async (post) => {
+ const handleDownvote = async (post) => {
     // Prevent double-clicks during operation
     if (votingInProgress[post.id]) return;
 
@@ -219,8 +207,7 @@ export default function Home() {
         deltaDown = 1;
         nextVote = "down";
       }
-    } else {
-      // current is null
+    } else { // current is null
       // CASE 3: User is adding a new downvote to a neutral post.
       // Only allow this if the score is > 0.
       if (score > 0) {
@@ -270,127 +257,73 @@ export default function Home() {
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search).get("search") || ""
       : "";
-
-  return (
-    // Main container with a dark background to enhance the visual effect
-    <div className="w-full bg-gray-900 text-white">
-      {/* We use a style tag here to define the animations and stacking layout */}
-      <style jsx global>{`
-        body {
-          background-color: #111827; // This matches bg-gray-900
-        }
-        .card-container {
-          // Add padding to ensure scroll effects are visible at the start and end of the list
-          padding-top: 15vh;
-          padding-bottom: 50vh;
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          margin-right: 100px;
-        }
-        .card {
-          // Initial state for the fade-in animation (invisible and slightly moved down)
-          opacity: 0;
-          transform: translateY(20px);
-          transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-        }
-        .card-loaded {
-          // Final state for the fade-in animation (fully visible and in position)
-          opacity: 1;
-          transform: translateY(0px);
-        }
-      `}</style>
-
-      <InteractiveBg />
-      {/* This container holds the stacking cards */}
-      <div className="card-container">
-        {Posts.map((post, index) => {
-          let score = (post.upvotes || 0) - (post.downvotes || 0);
-          let currentUserVote = getVote(post.id);
-          const isDownvoteDisabled = score <= 0 && currentUserVote !== "down";
-          return (
-            <div
-              key={post.id}
-              // We apply animation classes and then inline styles for dynamic stacking and delays
-              className={`card ${
-                isLoaded ? "card-loaded" : ""
-              } mx-auto w-full max-w-4xl my-4 p-4 rounded-lg flex flex-col gap-3 shadow-lg`}
-              style={{
-                background: "linear-gradient(to right, #00bfff, #5187d9ff)",
-                borderBottom: "4px solid #3288a5ff",
-                position: "sticky",
-                top: `${100 + index * 10}px`, // Makes cards stick to the top with an offset, creating the stack
-                transform: `scale(${1 - (Posts.length - 1 - index) * 0.04})`, // Scales down cards that are further back in the stack
-                zIndex: index, // Ensures the correct card is always on top
-                transitionDelay: `${index * 100}ms`, // Creates a staggered fade-in effect for each card
-              }}
-            >
-              {/* All of your original card content remains unchanged */}
-              <div className="flex items-center gap-4">
-                <h2 className="text-2xl font-bold">{post.title}</h2>
-                <div className="text-m rounded-full flex justify-center items-center bg-blue-400 p-1 w-20 text-center text-white">
-                  {post.flair}
-                </div>
-              </div>
-
-              <p className="text-gray-700 mb-4">{post.content}</p>
-              {post.image_url && (
-                <img src={post.image_url} className="justify-center" alt="" />
-              )}
-              <div className="translate-y-10">
-              <Comments postId={post.id} />
-              </div>
-              <div className="flex gap-3 items-center translate-y-8">
-                <img
-                  src="upvote.svg"
-                  onClick={() => {
-                    handleUpvote(post);
-                  }}
-                  className={`rounded-full h-5 w-5 cursor-pointer transition-opacity ${
-                    votingInProgress[post.id]
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                  } ${
-                    getVote(post.id) === "up" ? "ring-2 ring-orange-500" : ""
-                  }`}
-                  style={{
-                    pointerEvents: votingInProgress[post.id] ? "none" : "auto",
-                  }}
-                />
-                {post.upvotes - post.downvotes}
-                <img
-                  src="downvote.svg"
-                  onClick={() => {
-                    // The handler is already protected, but this is good practice
-                    if (!isDownvoteDisabled) {
-                      handleDownvote(post);
-                    }
-                  }}
-                  className={`rounded-full h-5 w-5 transition-opacity ${
-                    // Apply disabled styles
-                    isDownvoteDisabled || votingInProgress[post.id]
-                      ? "opacity-50 cursor-not-allowed"
-                      : "cursor-pointer"
-                  } ${
-                    currentUserVote === "down" ? "ring-2 ring-blue-500" : ""
-                  }`}
-                  style={{
-                    // Also disable pointer events
-                    pointerEvents:
-                      isDownvoteDisabled || votingInProgress[post.id]
-                        ? "none"
-                        : "auto",
-                  }}
-                />
-              </div>
-              <div className="text-sm text-right text-gray-800">
-                Posted on: {new Date(post.created_at).toLocaleDateString()}
+      
+      return (
+        <div className="min-h-screen w-full flex flex-col justify-center items-center">
+      {Posts.map((post) => {
+        let score = (post.upvotes || 0) - (post.downvotes || 0);
+        let currentUserVote = getVote(post.id);
+        const isDownvoteDisabled = score <= 0 && currentUserVote !== 'down';
+        return (
+          <div
+            key={post.id}
+            className=" mx-auto  w-2/3  my-4 p-4 border rounded-lg flex flex-col gap-3  shadow-sm bg-white"
+          >
+            <div className="flex items-center gap-4">
+              <h2 className="text-2xl font-bold ">{post.title}</h2>
+              <div className="text-m rounded-full flex justify-center items-center bg-blue-400 p-1 w-20 text-center text-white">
+                {" "}
+                {post.flair}
               </div>
             </div>
-          );
-        })}
-      </div>
+
+            <p className="text-gray-700 mb-4">{post.content}</p>
+            {post.image_url && (
+              <img src={post.image_url} className="justify-center" alt="" />
+            )}
+            <div className="flex gap-3 items-center">
+              <img
+                src="upvote.svg"
+                onClick={() => {
+                  handleUpvote(post);
+                }}
+                className={`rounded-full h-5 w-5 cursor-pointer transition-opacity ${
+                  votingInProgress[post.id]
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                } ${getVote(post.id) === "up" ? "ring-2 ring-orange-500" : ""}`}
+                style={{
+                  pointerEvents: votingInProgress[post.id] ? "none" : "auto",
+                }}
+              />
+              {post.upvotes - post.downvotes}
+              <img
+            src="downvote.svg"
+            onClick={() => {
+              // The handler is already protected, but this is good practice
+              if (!isDownvoteDisabled) {
+                handleDownvote(post);
+              }
+            }}
+            className={`rounded-full h-5 w-5 transition-opacity ${
+              // Apply disabled styles
+              isDownvoteDisabled || votingInProgress[post.id]
+                ? "opacity-50 cursor-not-allowed"
+                : "cursor-pointer"
+            } ${currentUserVote === "down" ? "ring-2 ring-blue-500" : ""}`}
+            style={{
+              // Also disable pointer events
+              pointerEvents: isDownvoteDisabled || votingInProgress[post.id] ? "none" : "auto",
+            }}
+          />
+            </div>
+            <Comments postId={post.id} />
+            <div className="text-sm text-gray-500">
+              Posted on: {new Date(post.created_at).toLocaleDateString()}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
