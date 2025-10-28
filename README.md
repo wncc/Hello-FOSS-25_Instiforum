@@ -21,7 +21,7 @@ This README provides an overview of the project, setup instructions, and a detai
 - **Authentication:** ITC SSO
 
 ## Existing Schemas
-(Create Them As it is)
+(Create Them As it is in supabase project tables- also toggle RLS policies off if facing issues while fetching)
 ### users
 | Column Name | Data Type     |
 |-------------|--------------|
@@ -75,7 +75,7 @@ This README provides an overview of the project, setup instructions, and a detai
 1. Clone the repository:
     ```bash
     git clone https://github.com/yourusername/instiforum.git
-    cd instiforum
+    cd Hello-FOSS-25_Instiforum
     ```
 2. Install dependencies:
     ```bash
