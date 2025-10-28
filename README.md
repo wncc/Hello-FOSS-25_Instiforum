@@ -21,7 +21,8 @@ This README provides an overview of the project, setup instructions, and a detai
 - **Authentication:** ITC SSO
 
 ## Existing Schemas
-### Users
+(Create Them As it is)
+### users
 | Column Name | Data Type     |
 |-------------|--------------|
 | id (primary)| UUID                        |
@@ -32,7 +33,7 @@ This README provides an overview of the project, setup instructions, and a detai
 | role        | text                        |
 | created_at  | timestamp with time zone    |
 
-### Posts
+### posts
 
 | Column Name   | Data Type                  |
 |---------------|---------------------------|
@@ -47,7 +48,7 @@ This README provides an overview of the project, setup instructions, and a detai
 | downvotes     | bigint                     |
 | flair         | text                       |
 
-### Comments
+### comments
 | Column Name  | Data Type                  |
 |--------------|---------------------------|
 | id           | bigint                    |
@@ -79,11 +80,22 @@ This README provides an overview of the project, setup instructions, and a detai
 2. Install dependencies:
     ```bash
     npm install
-    cd client
-    npm install
     ```
-3. Set up environment variables:
-    - Create a `.env` file in the root directory with your Supabase URI and secret.
+3. Supabase Setup (Online)
+
+    1. Go to [Supabase Dashboard](https://supabase.com/dashboard) and create a new project.  
+    2. In your project, open **Settings → API** and copy:
+         - **Project URL**
+         - **Anon public key**
+
+     3. In your project root, create a `.env` file and add the following lines keeping same variables names:
+         ```
+        NEXT_PUBLIC_SUPABASE_URL=[yourURL]
+        NEXT_PUBLIC_SUPABASE_ANON_KEY=[YourKEY]
+        NEXT_PUBLIC_IITSSO_ID=[YourKey] # not necessary
+         ```
+
+
 
 4. Start the development servers:
     ```bash

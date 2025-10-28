@@ -101,7 +101,7 @@ export default function Home() {
 
   // Load vote state for the current session/user from localStorage
   useEffect(() => {
-    const currentSessionKey = localStorage.getItem("sessionKey") || "anon";
+    const currentSessionKey = localStorage.getItem("sessionKey") || null;
     const stored = localStorage.getItem(`votes:${currentSessionKey}`);
     try {
       const parsed = stored ? JSON.parse(stored) : {};
@@ -117,7 +117,7 @@ export default function Home() {
       const next = { ...prev };
       if (value === null) delete next[postId];
       else next[postId] = value;
-      const currentSessionKey = localStorage.getItem("sessionKey") || "anon";
+      const currentSessionKey = localStorage.getItem("sessionKey") || null;
       localStorage.setItem(`votes:${currentSessionKey}`, JSON.stringify(next));
       return next;
     });

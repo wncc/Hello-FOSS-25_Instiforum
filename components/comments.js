@@ -38,7 +38,7 @@ export default function Comments({ postId }) {
 
   useEffect(() => {
     const loadVotes = () => {
-      const sessionKey = localStorage.getItem("sessionKey") || "anon";
+      const sessionKey = localStorage.getItem("sessionKey") || null;
       const raw = localStorage.getItem(`commentVotes:${sessionKey}`);
       try {
         const parsed = raw ? JSON.parse(raw) : {};
@@ -56,7 +56,7 @@ export default function Comments({ postId }) {
       const next = { ...prev };
       if (value === null) delete next[commentId];
       else next[commentId] = value;
-      const sessionKey = localStorage.getItem("sessionKey") || "anon";
+      const sessionKey = localStorage.getItem("sessionKey") || null;
       localStorage.setItem(`commentVotes:${sessionKey}`, JSON.stringify(next));
       return next;
     });
@@ -82,7 +82,7 @@ export default function Comments({ postId }) {
 
   const handleCreate = async (content, parentId = null) => {
     const userdata = JSON.parse(localStorage.getItem("user") || "{}");
-    const userid = userdata.id || "anon";
+    const userid = userdata.id || null;
     const trimmed = (content || "").trim();
     if (!trimmed) return;
     setSubmitting(true);
