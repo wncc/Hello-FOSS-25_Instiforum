@@ -18,7 +18,7 @@ const Navbar = () => {
   }, []);
 
   return (
-    <div className='fixed top-0 w-full bg-white/80 backdrop-blur-2xl flex items-center justify-center text-black'>
+    <div className='w-full bg-white/80 backdrop-blur-2xl flex items-center justify-center text-black'>
       <div className='flex justify-between items-center px-6 py-3 w-full max-w-[1800px]'>
         <Link href="/home">
           <h1 className='text-3xl font-semibold'>Instiforum</h1>

@@ -50,7 +50,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        {/* <Navbar /> */}
+        <Navbar />
 
         {/* Main content */}
         <main className="flex w-full min-h-screen bg-[#e8e8e8] text-black">
