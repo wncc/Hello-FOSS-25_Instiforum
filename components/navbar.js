@@ -8,13 +8,26 @@ const Navbar = () => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const localUser = localStorage.getItem("user");
-    if (localUser) {
-      setUser(JSON.parse(localUser));
-    } 
-    else {
-      setUser(null);
-    }
+    const updateUserState = () => {
+      const localUser = localStorage.getItem("user");
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      if (localUser && isLoggedIn === "true") {
+        setUser(JSON.parse(localUser));
+      } else {
+        setUser(null);
+      }
+    };
+
+    updateUserState();
+
+    const handleAuthChange = () => updateUserState();
+    window.addEventListener('storage', handleAuthChange);
+    window.addEventListener('authStateChanged', handleAuthChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleAuthChange);
+      window.removeEventListener('authStateChanged', handleAuthChange);
+    };
   }, []);
 
   return (
@@ -30,9 +43,15 @@ const Navbar = () => {
               <div className='flex gap-4 items-center'>
                 <Link href="/profile">
                   {/* replace this with actual image of user */}
-                  <img src={user ? user.image: "https://avatar.iran.liara.run/public/36"} className='h-9 w-9 rounded-full border-1 border-gray-300' alt='user image' />
+                  <img 
+                    src={user?.image || "https://avatar.iran.liara.run/public/36"} 
+                    className='h-9 w-9 rounded-full border border-gray-300 object-cover' 
+                    alt='user image' 
+                  />
                 </Link>
-                <Button variant="default">Logout</Button>
+                <Link href="/signout">
+                  <Button variant="default">Logout</Button>
+                </Link>
               </div>
              
             ) : (
