@@ -62,7 +62,7 @@ const FloatingDockDesktop = ({
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
       className={cn(
-        "fixed bottom-2 left-[50%] translate-x-[-50%] items-end gap-4 rounded-full bg-white/80 px-4 flex shadow-lg backdrop-blur z-40",
+        "fixed bottom-4 left-[50%] translate-x-[-50%] items-end gap-4 rounded-full bg-white/90 px-6 py-2 flex shadow-xl backdrop-blur-md border border-gray-200 z-50",
         className,
       )}
     >
@@ -124,14 +124,14 @@ function IconContainer({
   const [hovered, setHovered] = useState(false);
 
   return (
-    <Link href={href}>
-      <motion.div
-        ref={ref}
-        style={{ width, height }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        className="relative flex aspect-square items-center justify-center rounded-full"
-      >
+    <motion.div
+      ref={ref}
+      style={{ width, height }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="relative flex aspect-square items-center justify-center rounded-full hover:bg-blue-50 transition-colors cursor-pointer"
+    >
+      <Link href={href} className="absolute inset-0 flex items-center justify-center rounded-full">
         <AnimatePresence>
           {hovered && (
             <motion.div
@@ -150,7 +150,7 @@ function IconContainer({
         >
           {icon}
         </motion.div>
-      </motion.div>
-    </Link>
+      </Link>
+    </motion.div>
   );
 }

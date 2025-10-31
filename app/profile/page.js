@@ -2,10 +2,15 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseclient";
 import { Button } from "@/components/ui/button";
+import ProfilePictureUpload from "../../components/ProfilePictureUpload";
 
 const page = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const handleImageUpdate = (newImageUrl) => {
+    setUser(prev => ({ ...prev, image: newImageUrl }));
+  };
 
   useEffect(() => {
     // Try to get user from localStorage first
@@ -32,7 +37,12 @@ const page = () => {
   return (
     <div className="min-h-screen w-full flex justify-center items-center text-black">
       <div className="min-w-xl mt-10 p-6 bg-white rounded shadow-xl">
-        <h1 className="text-3xl font-bold mb-4">Profile</h1>
+        <h1 className="text-3xl font-bold mb-6 text-center">Profile</h1>
+        
+        <div className="flex flex-col items-center mb-6">
+          <ProfilePictureUpload user={user} onImageUpdate={handleImageUpdate} />
+        </div>
+        
         <div className="space-y-2 mb-6">
           <div><strong>Name:</strong> {user.name}</div>
           <div><strong>Roll:</strong> {user.roll}</div>
@@ -41,8 +51,11 @@ const page = () => {
           <div><strong>Role:</strong> {user.role}</div>
           <div><strong>Joined:</strong> {user.created_at ? new Date(user.created_at).toLocaleString() : "-"}</div>
         </div>
+        
+        <div className="text-center">
           <Button onClick={handleLogout} variant="default">Logout</Button>
         </div>
+      </div>
     </div>
   );
 
